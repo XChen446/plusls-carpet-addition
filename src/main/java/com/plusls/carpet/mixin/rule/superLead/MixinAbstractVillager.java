@@ -18,15 +18,14 @@ public abstract class MixinAbstractVillager extends AgableMob {
     }
 
     @Inject(
-            method = "canBeLeashed",
-            at = @At(
-                    value = "RETURN"
-            ),
+            method = "canBeLeashedBy",  // 正确目标方法名
+            at = @At(value = "RETURN"),
             cancellable = true
     )
-    private void postCanBeLeashed(Player player, CallbackInfoReturnable<Boolean> cir) {
+    private void postCanBeLeashedBy(Player player, CallbackInfoReturnable<Boolean> cir) {
         if (PluslsCarpetAdditionSettings.superLead) {
-            cir.setReturnValue(!isLeashed());
+            // 逻辑：若启用 superLead 规则，允许牵引未被拴绳的村民
+            cir.setReturnValue(!this.isLeashed());
         }
     }
 }
