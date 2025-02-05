@@ -1,31 +1,24 @@
 package com.plusls.carpet.mixin.rule.superLead;
 
 import com.plusls.carpet.PluslsCarpetAdditionSettings;
-import net.minecraft.world.entity.AgableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractVillager.class)
-public abstract class MixinAbstractVillager extends AgableMob {
-    protected MixinAbstractVillager(EntityType<? extends AgableMob> entityType, Level level) {
-        super(entityType, level);
-    }
+@Mixin(MerchantEntity.class)
+public abstract class MixinMerchantEntity {
 
     @Inject(
-            method = "canBeLeashedBy",  // 正确目标方法名
-            at = @At(value = "RETURN"),
-            cancellable = true
+        method = "canBeLeashedBy", // 确认方法存在于 MerchantEntity 或其父类
+        at = @At("HEAD"),
+        cancellable = true
     )
-    private void postCanBeLeashedBy(Player player, CallbackInfoReturnable<Boolean> cir) {
+    private void postCanBeLeashedBy(PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
         if (PluslsCarpetAdditionSettings.superLead) {
-            // 逻辑：若启用 superLead 规则，允许牵引未被拴绳的村民
-            cir.setReturnValue(!this.isLeashed());
+            cir.setReturnValue(!((MerchantEntity) (Object) this).isLeashed());
         }
     }
 }
